@@ -34,6 +34,31 @@ func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (A
 	return i, err
 }
 
+const createTransfer = `-- name: CreateTransfer :one
+INSERT INTO transfers (from_account_id, to_account_id, amount)
+VALUES ($1, $2, $3)
+RETURNING id, from_account_id, to_account_id, amount, created_at
+`
+
+type CreateTransferParams struct {
+	FromAccountID int64
+	ToAccountID   int64
+	Amount        int64
+}
+
+func (q *Queries) CreateTransfer(ctx context.Context, arg CreateTransferParams) (Transfer, error) {
+	row := q.db.QueryRow(ctx, createTransfer, arg.FromAccountID, arg.ToAccountID, arg.Amount)
+	var i Transfer
+	err := row.Scan(
+		&i.ID,
+		&i.FromAccountID,
+		&i.ToAccountID,
+		&i.Amount,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (email, password_hash)
 VALUES ($1, $2)
@@ -52,6 +77,24 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.ID,
 		&i.Email,
 		&i.PasswordHash,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const getAccount = `-- name: GetAccount :one
+SELECT id, user_id, balance, currency, created_at FROM accounts
+WHERE id = $1 LIMIT 1
+`
+
+func (q *Queries) GetAccount(ctx context.Context, id int64) (Account, error) {
+	row := q.db.QueryRow(ctx, getAccount, id)
+	var i Account
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Balance,
+		&i.Currency,
 		&i.CreatedAt,
 	)
 	return i, err
@@ -90,6 +133,45 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.CreatedAt,
 	)
 	return i, err
+}
+
+const listAccounts = `-- name: ListAccounts :many
+SELECT id, user_id, balance, currency, created_at FROM accounts
+WHERE user_id = $1
+ORDER BY id
+LIMIT $2 OFFSET $3
+`
+
+type ListAccountsParams struct {
+	UserID int64
+	Limit  int32
+	Offset int32
+}
+
+func (q *Queries) ListAccounts(ctx context.Context, arg ListAccountsParams) ([]Account, error) {
+	rows, err := q.db.Query(ctx, listAccounts, arg.UserID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Account
+	for rows.Next() {
+		var i Account
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.Balance,
+			&i.Currency,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const updateAccountBalance = `-- name: UpdateAccountBalance :one
