@@ -16,21 +16,22 @@ This document outlines the development phases for the Digital Wallet API.
 - [x] Create Authentication middleware to protect API routes.
 - [x] Create Logging middleware for request tracking.
 
-## Phase 3: API Implementation (In Progress 🚧)
-- [ ] Setup Go 1.22+ native `net/http` server.
-- [ ] Implement `Users` handlers (Registration, Login).
-- [ ] Implement `Accounts` handlers (Create account, Get balance).
-- [ ] Implement `Transfers` handlers (Execute transfer).
-- [ ] Integrate middlewares with routers.
-- [ ] Implement graceful shutdown for the HTTP server.
+## Phase 3: API Implementation (Completed ✅)
+- [x] Setup Go 1.22+ native `net/http` server with routing.
+- [x] Implement `Users` handlers (Registration, Login).
+- [x] Implement `Accounts` handlers (Create account, Get balance, List accounts).
+- [x] Implement `Transfers` handlers (Execute atomic transfer).
+- [x] Integrate `Auth` and `Logger` middlewares with router.
+- [x] Implement graceful shutdown for the HTTP server.
 
-## Phase 4: Testing & Quality Assurance (Upcoming 📅)
-- [ ] Write unit tests for database CRUD operations (mocking/test DB).
-- [ ] Write unit tests for API handlers using `httptest`.
-- [ ] Implement database deadlock testing for concurrent transactions.
-- [ ] Setup CI pipeline (e.g., GitHub Actions) to run tests automatically.
+## Phase 4: Testing & Quality Assurance (Completed ✅)
+- [x] Write unit tests for utilities (`password_test.go`, `jwt_test.go`, `config_test.go`).
+- [x] Write unit tests for middlewares (`auth_test.go`, `logger_test.go`).
+- [x] Write modular table-driven unit tests for API handlers (`user_test.go`, `account_test.go`, `transfer_test.go`, `server_test.go`).
+- [x] Implement database deadlock integration tests (`store_test.go`).
+- [x] Setup CI pipeline (`.github/workflows/ci.yml`) to run tests automatically.
 
-## Phase 5: Production Readiness (Upcoming 📅)
+## Phase 5: Production Readiness (In Progress 🚧)
+- [x] Setup configuration management (`util/config.go` using `joho/godotenv`).
 - [ ] Write Dockerfile for the Go API application.
-- [ ] Setup configuration management (loading from env vars/files).
 - [ ] Finalize production deployment strategy.
