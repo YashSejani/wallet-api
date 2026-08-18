@@ -50,7 +50,6 @@ func (server *Server) createTransfer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Validate source account ownership, currency match, and sufficient balance
 	fromAccount, err := server.store.GetAccount(r.Context(), req.FromAccountID)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
@@ -76,7 +75,6 @@ func (server *Server) createTransfer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Validate destination account existence and currency match
 	toAccount, err := server.store.GetAccount(r.Context(), req.ToAccountID)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
@@ -90,7 +88,6 @@ func (server *Server) createTransfer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Execute atomic P2P transfer transaction
 	arg := db.TransferTxParams{
 		FromAccountID: req.FromAccountID,
 		ToAccountID:   req.ToAccountID,

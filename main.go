@@ -18,13 +18,11 @@ import (
 )
 
 func main() {
-	// 1. Load configuration
 	config, err := util.LoadConfig(".")
 	if err != nil {
 		log.Fatalf("cannot load config: %v", err)
 	}
 
-	// 2. Connect to PostgreSQL database connection pool
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -39,7 +37,6 @@ func main() {
 	}
 	log.Println("successfully connected to PostgreSQL database")
 
-	// 3. Initialize SQLStore and API Server
 	store := db.NewStore(connPool)
 	server, err := api.NewServer(config, store)
 	if err != nil {
@@ -51,7 +48,6 @@ func main() {
 		Handler: server.Router(),
 	}
 
-	// 4. Start HTTP Server in a goroutine
 	go func() {
 		log.Printf("HTTP server running on %s", config.ServerAddress)
 		if err := httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
@@ -59,7 +55,6 @@ func main() {
 		}
 	}()
 
-	// 5. Graceful shutdown handler
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
